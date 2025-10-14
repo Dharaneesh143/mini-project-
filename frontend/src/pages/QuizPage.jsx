@@ -63,13 +63,27 @@ const QuizPage = () => {
     },
     {
       id: 5,
-      question: "Do you prefer movies based on books or original stories?",
+      question: "What movie setting appeals to you most?",
       type: "single",
       multiple: false,
       options: [
-        { value: "book", label: "Book Adaptations", icon: "📚", description: "Stories that started as novels" },
-        { value: "original", label: "Original Screenplays", icon: "✍️", description: "Fresh stories created for film" },
-        { value: "both", label: "Both Are Great", icon: "🤝", description: "Love adaptations and originals equally" }
+        { value: "urban", label: "Urban/City Life", icon: "🏙️", description: "Stories set in bustling cities" },
+        { value: "space", label: "Space/Future", icon: "🚀", description: "Intergalactic adventures and sci-fi" },
+        { value: "historical", label: "Historical Periods", icon: "🏰", description: "Period dramas and historical events" },
+        { value: "fantasy", label: "Fantasy Worlds", icon: "🧙", description: "Magical realms and fantasy adventures" },
+        { value: "nature", label: "Nature/Outdoors", icon: "🌲", description: "Stories in natural settings" }
+      ]
+    },
+    {
+      id: 6,
+      question: "What type of characters do you prefer?",
+      type: "single",
+      multiple: false,
+      options: [
+        { value: "heroes", label: "Classic Heroes", icon: "🦸", description: "Brave protagonists saving the day" },
+        { value: "antiheroes", label: "Complex Anti-heroes", icon: "🦹", description: "Morally ambiguous characters" },
+        { value: "everyday", label: "Everyday People", icon: "👤", description: "Relatable ordinary characters" },
+        { value: "historical", label: "Historical Figures", icon: "👑", description: "Real people from history" }
       ]
     }
   ]

@@ -12,9 +12,9 @@ const Hero = () => {
   useEffect(() => {
     const fetchRandomMovie = async () => {
       try {
-        const response = await movieService.getMovies(1)
-        if (response.data && response.data.length > 0) {
-          const randomMovie = getRandomItems(response.data, 1)[0]
+        const { movies } = await movieService.getPopularMovies(1)
+        if (movies && movies.length > 0) {
+          const randomMovie = getRandomItems(movies, 1)[0]
           setCurrentMovie(randomMovie)
         }
       } catch (error) {

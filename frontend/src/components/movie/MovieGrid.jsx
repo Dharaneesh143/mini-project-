@@ -34,12 +34,12 @@ const MovieGrid = ({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {movies.map((movie, index) => (
-        <div key={movie.id} className={`opacity-0 animate-fade-in-up`} style={{ animationDelay: `${(index % 8) * 60}ms` }}>
+        <div key={movie.id || movie.tmdbId} className={`opacity-0 animate-fade-in-up`} style={{ animationDelay: `${(index % 8) * 60}ms` }}>
           <MovieCard
             movie={movie}
             onAddToWatchlist={onAddToWatchlist}
             onRemoveFromWatchlist={onRemoveFromWatchlist}
-            isInWatchlist={isInWatchlist ? isInWatchlist(movie.id) : false}
+            isInWatchlist={isInWatchlist ? isInWatchlist(movie.id || movie.tmdbId) : false}
           />
         </div>
       ))}

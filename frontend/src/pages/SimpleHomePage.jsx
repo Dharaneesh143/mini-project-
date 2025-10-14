@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import HeroSection from '../components/HeroSection'
 import MovieCard from '../components/movie/MovieCard'
+import SearchBar from '../components/common/SearchBar'
 import { Sparkles, FileQuestion } from 'lucide-react'
+import movieService from '../services/movieService'
 
 const SimpleHomePage = () => {
   const [movies, setMovies] = useState([])
+  const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -13,12 +16,8 @@ const SimpleHomePage = () => {
     const fetchPopularMovies = async () => {
       try {
         setLoading(true)
-        const response = await fetch('/api/movies/popular')
-        if (!response.ok) {
-          throw new Error('Network response was not ok')
-        }
-        const data = await response.json()
-        setMovies(data.data || [])
+        const { movies } = await movieService.getPopularMovies(1)
+        setMovies(movies || [])
       } catch (err) {
         setError(err.message)
         console.error("Failed to fetch popular movies:", err)
@@ -54,6 +53,15 @@ const SimpleHomePage = () => {
 
       <main>
         <HeroSection />
+        {/* On-page Search */}
+        <div className="container mx-auto px-4 mt-8">
+          <SearchBar
+            placeholder="Search movies (all languages)"
+            value={searchQuery}
+            onChange={setSearchQuery}
+            onClear={() => setSearchQuery('')}
+          />
+        </div>
         <div className="container mx-auto px-4 py-12">
           <h2 className="text-2xl font-bold text-white mb-6">New Releases</h2>
           {loading && (

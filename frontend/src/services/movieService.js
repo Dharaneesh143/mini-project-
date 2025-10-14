@@ -1,4 +1,15 @@
 import axios from 'axios'
+import {
+  hasTmdbKey,
+  tmdbPopular,
+  tmdbTrending,
+  tmdbUpcoming,
+  tmdbSearch,
+  tmdbDetails,
+  tmdbSimilar,
+  mapTmdbToMovie,
+  mapTmdbToDetails,
+} from './tmdbClient'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
@@ -26,6 +37,17 @@ class MovieService {
       return this.formatMoviesResponse(response.data)
     } catch (error) {
       console.error('Error fetching popular movies:', error)
+      // Fallback to TMDB if backend fails and TMDB key is available
+      if (hasTmdbKey()) {
+        try {
+          const data = await tmdbPopular(page)
+          const movies = data.results.map(mapTmdbToMovie)
+          return { movies, totalPages: data.total_pages, totalResults: data.total_results, page: data.page }
+        } catch (tmdbError) {
+          console.error('TMDB fallback also failed:', tmdbError)
+          throw error // Throw original error
+        }
+      }
       throw error
     }
   }
@@ -37,6 +59,17 @@ class MovieService {
       return this.formatMoviesResponse(response.data)
     } catch (error) {
       console.error('Error fetching all movies:', error)
+      // Fallback to TMDB if backend fails and TMDB key is available
+      if (hasTmdbKey()) {
+        try {
+          const data = await tmdbTrending(page)
+          const movies = data.results.map(mapTmdbToMovie)
+          return { movies, totalPages: data.total_pages, totalResults: data.total_results, page: data.page }
+        } catch (tmdbError) {
+          console.error('TMDB fallback also failed:', tmdbError)
+          throw error // Throw original error
+        }
+      }
       throw error
     }
   }
@@ -48,6 +81,17 @@ class MovieService {
       return this.formatMoviesResponse(response.data)
     } catch (error) {
       console.error('Error fetching trending movies:', error)
+      // Fallback to TMDB if backend fails and TMDB key is available
+      if (hasTmdbKey()) {
+        try {
+          const data = await tmdbTrending(page)
+          const movies = data.results.map(mapTmdbToMovie)
+          return { movies, totalPages: data.total_pages, totalResults: data.total_results, page: data.page }
+        } catch (tmdbError) {
+          console.error('TMDB fallback also failed:', tmdbError)
+          throw error // Throw original error
+        }
+      }
       throw error
     }
   }
@@ -59,6 +103,17 @@ class MovieService {
       return this.formatMoviesResponse(response.data)
     } catch (error) {
       console.error('Error fetching upcoming movies:', error)
+      // Fallback to TMDB if backend fails and TMDB key is available
+      if (hasTmdbKey()) {
+        try {
+          const data = await tmdbUpcoming(page)
+          const movies = data.results.map(mapTmdbToMovie)
+          return { movies, totalPages: data.total_pages, totalResults: data.total_results, page: data.page }
+        } catch (tmdbError) {
+          console.error('TMDB fallback also failed:', tmdbError)
+          throw error // Throw original error
+        }
+      }
       throw error
     }
   }
@@ -66,12 +121,24 @@ class MovieService {
   // Search movies
   async searchMovies(query, page = 1) {
     try {
-      const response = await this.api.get('/movies/search', {
-        params: { q: query, page, limit: 20 }
-      })
+      console.log('Searching movies with query:', query, 'page:', page)
+      const response = await this.api.get('/movies/search', { params: { q: query, page, limit: 20 } })
+      console.log('Search response:', response.data)
       return this.formatMoviesResponse(response.data)
     } catch (error) {
       console.error('Error searching movies:', error)
+      // Fallback to TMDB if backend fails and TMDB key is available
+      if (hasTmdbKey()) {
+        try {
+          console.log('Falling back to TMDB search')
+          const data = await tmdbSearch(query, page, false)
+          const movies = data.results.map(mapTmdbToMovie)
+          return { movies, totalPages: data.total_pages, totalResults: data.total_results, page: data.page }
+        } catch (tmdbError) {
+          console.error('TMDB fallback also failed:', tmdbError)
+          throw error // Throw original error
+        }
+      }
       throw error
     }
   }
@@ -79,9 +146,13 @@ class MovieService {
   // Get movies by genre
   async getMoviesByGenre(genre, page = 1) {
     try {
-      const response = await this.api.get(`/movies/genre/${genre}`, {
-        params: { page, limit: 20 }
-      })
+      if (hasTmdbKey()) {
+        // Fallback to search by genre name when using TMDB without genre mapping
+        const data = await tmdbSearch(genre, page, false)
+        const movies = data.results.map(mapTmdbToMovie)
+        return { movies, totalPages: data.total_pages, totalResults: data.total_results, page: data.page }
+      }
+      const response = await this.api.get(`/movies/genre/${genre}`, { params: { page, limit: 20 } })
       return this.formatMoviesResponse(response.data)
     } catch (error) {
       console.error('Error fetching movies by genre:', error)
@@ -118,6 +189,10 @@ class MovieService {
   // Get movie details
   async getMovieDetails(id) {
     try {
+      if (hasTmdbKey()) {
+        const data = await tmdbDetails(id)
+        return mapTmdbToDetails(data)
+      }
       const response = await this.api.get(`/movies/tmdb/${id}`)
       return this.formatMovieDetails(response.data.data)
     } catch (error) {
@@ -129,9 +204,12 @@ class MovieService {
   // Get similar movies
   async getSimilarMovies(id, limit = 4) {
     try {
-      const response = await this.api.get(`/movies/${id}/similar`, {
-        params: { limit }
-      })
+      if (hasTmdbKey()) {
+        const data = await tmdbSimilar(id, 1)
+        const movies = (data.results || []).slice(0, limit).map(mapTmdbToMovie)
+        return { movies }
+      }
+      const response = await this.api.get(`/movies/${id}/similar`, { params: { limit } })
       return { movies: response.data.data || [] }
     } catch (error) {
       console.error('Error fetching similar movies:', error)

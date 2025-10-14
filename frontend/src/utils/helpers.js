@@ -198,6 +198,17 @@ export const formatNumber = (num) => {
   return num.toString()
 }
 
+// Format currency for display
+export const formatCurrency = (amount) => {
+  if (!amount || amount === 0) return 'N/A'
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount)
+}
+
 // Get time ago from timestamp
 export const getTimeAgo = (timestamp) => {
   const now = new Date()

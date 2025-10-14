@@ -8,7 +8,7 @@ export const API_CONFIG = {
 
 // TMDB API Configuration
 export const TMDB_CONFIG = {
-  API_KEY: import.meta.env.VITE_TMDB_API_KEY || 'ecfa837bb91bbbca17970e60da354c6b',
+  API_KEY: import.meta.env.VITE_TMDB_API_KEY,
   IMAGE_SIZES: {
     POSTER: {
       SMALL: 'w185',

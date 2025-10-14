@@ -1,13 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { genresList } from '../../data/genres'
 import { getGenreEmoji } from '../../utils/helpers'
 
 const GenreDropdown = ({ selectedGenres, onChange }) => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef(null)
+  const navigate = useNavigate()
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen)
+  }
+
+  const handleGenreSelect = (genre) => {
+    // Navigate to genre page instead of just selecting
+    const genreSlug = genre.toLowerCase().replace(/\s+/g, '-')
+    navigate(`/genre/${genreSlug}`)
+    setIsOpen(false)
   }
 
   const handleGenreToggle = (genre) => {
@@ -40,9 +49,10 @@ const GenreDropdown = ({ selectedGenres, onChange }) => {
       <button
         type="button"
         onClick={toggleDropdown}
-        className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none"
+        className="inline-flex justify-center w-full rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none transition-colors"
       >
-        Genre
+        <span className="mr-2">🎬</span>
+        Browse by Genre
         <svg
           className="-mr-1 ml-2 h-5 w-5"
           xmlns="http://www.w3.org/2000/svg"
@@ -55,22 +65,17 @@ const GenreDropdown = ({ selectedGenres, onChange }) => {
       </button>
 
       {isOpen && (
-        <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+        <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
           <div className="py-1 max-h-60 overflow-auto">
             {genresList.map((genre) => (
-              <label
+              <button
                 key={genre}
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+                onClick={() => handleGenreSelect(genre)}
+                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors"
               >
-                <input
-                  type="checkbox"
-                  checked={selectedGenres.includes(genre)}
-                  onChange={() => handleGenreToggle(genre)}
-                  className="mr-2"
-                  disabled={!selectedGenres.includes(genre) && selectedGenres.length >= 3}
-                />
-                <span>{getGenreEmoji(genre)} {genre}</span>
-              </label>
+                <span className="mr-2">{getGenreEmoji(genre)}</span>
+                <span>{genre}</span>
+              </button>
             ))}
           </div>
         </div>

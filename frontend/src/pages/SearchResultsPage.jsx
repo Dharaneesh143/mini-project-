@@ -11,6 +11,13 @@ const SearchResultsPage = () => {
 
   const { results: searchResults, isLoading: loading, error, hasSearched } = useSearch(query)
 
+  // Debug logging
+  console.log('SearchResultsPage - Query:', query)
+  console.log('SearchResultsPage - Results:', searchResults)
+  console.log('SearchResultsPage - Loading:', loading)
+  console.log('SearchResultsPage - Error:', error)
+  console.log('SearchResultsPage - HasSearched:', hasSearched)
+
   const handleAddToWatchlist = (movie) => {
     addToWatchlist(movie)
   }
@@ -20,7 +27,7 @@ const SearchResultsPage = () => {
   }
 
   const isInWatchlist = (movieId) => {
-    return watchlist.some(movie => movie.id === movieId)
+    return watchlist.some(movie => (movie.id || movie.tmdbId) === movieId)
   }
 
   return (

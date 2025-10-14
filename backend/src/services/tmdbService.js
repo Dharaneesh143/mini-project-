@@ -152,9 +152,16 @@ class TMDBService {
   }
 
   // Get movies by genre
-  async getMoviesByGenre(genreId, page = 1) {
+  async getMoviesByGenre(genreName, page = 1) {
     try {
       const api = this.createAxiosInstance()
+      
+      // Get genre ID from name
+      const genreId = this.getGenreIdFromName(genreName)
+      if (!genreId) {
+        throw new Error(`Genre "${genreName}" not found`)
+      }
+
       const response = await api.get('/discover/movie', {
         params: { 
           with_genres: genreId,
@@ -167,6 +174,32 @@ class TMDBService {
       console.error('Error fetching movies by genre:', error.message)
       throw new Error('Failed to fetch movies by genre from TMDB')
     }
+  }
+
+  // Map genre names to TMDB genre IDs
+  getGenreIdFromName(genreName) {
+    const genreMap = {
+      'Action': 28,
+      'Adventure': 12,
+      'Animation': 16,
+      'Comedy': 35,
+      'Crime': 80,
+      'Documentary': 99,
+      'Drama': 18,
+      'Family': 10751,
+      'Fantasy': 14,
+      'History': 36,
+      'Horror': 27,
+      'Music': 10402,
+      'Mystery': 9648,
+      'Romance': 10749,
+      'Sci-Fi': 878,
+      'Science Fiction': 878,
+      'Thriller': 53,
+      'War': 10752,
+      'Western': 37
+    }
+    return genreMap[genreName]
   }
 
   // Get similar movies
