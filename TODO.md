@@ -1,0 +1,10 @@
+- [x] Update TMDB service getMovieDetails method to fetch keywords from /movie/{id}/keywords endpoint
+- [x] Update formatMovieDetails to include keywords array mapped from TMDB response
+- [x] Fix JSX syntax error in MovieDetailsPage.jsx (misplaced </div> tag in keywords section)
+- [x] Fix Vite configuration root path for proper build
+- [x] Fix duplicate send button in ChatBot component
+- [x] Add newReleases to useRecommendations hook return statement
+- [x] Add Calendar icon import to HomePage.jsx
+- [x] Destructure newReleases from useRecommendations in HomePage.jsx
+- [x] Add New Releases section to HomePage.jsx with Calendar icon
+- [x] Add getUpcomingMovies method to movieService.js
