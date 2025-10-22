@@ -14,19 +14,19 @@ const MovieCard = ({
     e.stopPropagation()
     
     if (isInWatchlist) {
-      onRemoveFromWatchlist(movie.id)
+      onRemoveFromWatchlist(movie.id || movie.tmdbId)
     } else {
       onAddToWatchlist(movie)
     }
   }
 
   return (
-    <Link to={`/movie/${movie.id}`} className="group">
+    <Link to={`/movie/${movie.id || movie.tmdbId}`} className="group">
       <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 animate-scale-in">
         {/* Movie Poster */}
         <div className="relative">
           <img
-            src={movie.poster || 'https://via.placeholder.com/300x450/374151/9ca3af?text=No+Poster+Available'}
+            src={movie.poster || movie.posterPath || movie.posterUrl || 'https://via.placeholder.com/300x450/374151/9ca3af?text=No+Poster+Available'}
             alt={movie.title}
             className="w-full h-64 object-cover"
             loading="lazy"
@@ -34,7 +34,7 @@ const MovieCard = ({
           
           {/* Rating Badge */}
           <div className="absolute top-2 right-2 bg-yellow-500 text-black px-2 py-1 rounded text-sm font-bold">
-            ⭐ {formatRating(movie.rating)}
+            ⭐ {formatRating(movie.rating || movie.voteAverage)}
           </div>
           
           {/* Watchlist Button */}
@@ -69,17 +69,17 @@ const MovieCard = ({
           </h3>
           
           <div className="flex items-center justify-between text-sm text-gray-400 mb-2">
-            <span>{movie.genre}</span>
-            <span>{movie.year}</span>
+            <span>{movie.genre || (Array.isArray(movie.genres) ? movie.genres.join(', ') : '')}</span>
+            <span>{movie.year || (movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : '')}</span>
           </div>
           
           <p className="text-gray-300 text-sm line-clamp-3 mb-3">
-            {movie.description}
+            {movie.description || movie.overview}
           </p>
           
           {/* Additional Info */}
           <div className="flex items-center justify-between text-xs text-gray-500">
-            <span>{movie.duration || 'N/A'}</span>
+            <span>{movie.duration || (movie.runtime ? `${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m` : 'N/A')}</span>
             <span>{movie.originalLanguage ? movie.originalLanguage.toUpperCase() : 'N/A'}</span>
           </div>
         </div>
