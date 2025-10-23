@@ -6,77 +6,50 @@ class GeminiService {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY || 'AIzaSyBLV08Un617dltyugY-OOIuReSsfGckWuE'
     console.log('Initializing Gemini service with API key:', apiKey.substring(0, 10) + '...')
     this.genAI = new GoogleGenerativeAI(apiKey)
-    // We'll set the model after checking what's available
+    // We'll set the model after discovering what's available
     this.model = null
   }
 
   async listAvailableModels() {
     try {
-      console.log('Attempting to list models...')
-      const models = await this.genAI.listModels()
-      console.log('Raw models response:', models)
-      console.log('Available models:', models)
+      console.log('Attempting to find a working model...')
       
-      // The response structure might be different, let's check
-      const modelList = models.models || models
-      console.log('Model list:', modelList)
+      // Try common model names directly since listModels() is not available
+      const modelNames = [
+        'gemini-2.0-flash-exp',
+        'gemini-1.5-pro',
+        'gemini-1.0-pro',
+        'gemini-pro',
+        'gemini-1.5-flash',
+        'gemini-1.5-pro-001'
+      ]
       
-      // Find a model that supports generateContent
-      const generateContentModels = modelList.filter(model => {
-        console.log('Checking model:', model.name, 'supported methods:', model.supportedMethods)
-        return model.supportedMethods && model.supportedMethods.includes('generateContent')
-      })
+      console.log('Trying model names:', modelNames)
       
-      console.log('Models that support generateContent:', generateContentModels)
-      
-      if (generateContentModels.length > 0) {
-        const workingModel = generateContentModels[0]
-        console.log(`Setting working model to: ${workingModel.name}`)
-        this.model = this.genAI.getGenerativeModel({ model: workingModel.name })
-        return workingModel.name
-      }
-      
-      // If no models found with generateContent, try common model names
-      console.log('No models found with generateContent, trying common names...')
-      const commonModelNames = ['gemini-pro', 'gemini-1.0-pro', 'gemini-1.5-flash', 'gemini-1.5-pro']
-      
-      for (const modelName of commonModelNames) {
+      for (const modelName of modelNames) {
         try {
-          console.log(`Trying common model name: ${modelName}`)
+          console.log(`Trying model: ${modelName}`)
           const model = this.genAI.getGenerativeModel({ model: modelName })
-          // Test if it works
-          const testResult = await model.generateContent('test')
-          console.log(`Model ${modelName} works!`)
+          
+          // Test if it works with a simple request
+          const testResult = await model.generateContent('Hello')
+          const response = await testResult.response
+          const text = response.text()
+          
+          console.log(`✅ Model ${modelName} works! Response: ${text}`)
           this.model = model
           return modelName
+          
         } catch (modelError) {
-          console.log(`Model ${modelName} failed:`, modelError.message)
+          console.log(`❌ Model ${modelName} failed:`, modelError.message)
         }
       }
       
+      console.log('No working models found')
       return null
+      
     } catch (error) {
-      console.error('Error listing models:', error)
-      console.error('Error details:', error.message)
-      
-      // Fallback: try common model names even if listModels fails
-      console.log('listModels failed, trying fallback approach...')
-      const fallbackModelNames = ['gemini-pro', 'gemini-1.0-pro', 'gemini-1.5-flash', 'gemini-1.5-pro']
-      
-      for (const modelName of fallbackModelNames) {
-        try {
-          console.log(`Trying fallback model: ${modelName}`)
-          const model = this.genAI.getGenerativeModel({ model: modelName })
-          // Test if it works
-          const testResult = await model.generateContent('test')
-          console.log(`Fallback model ${modelName} works!`)
-          this.model = model
-          return modelName
-        } catch (modelError) {
-          console.log(`Fallback model ${modelName} failed:`, modelError.message)
-        }
-      }
-      
+      console.error('Error in listAvailableModels:', error)
       return null
     }
   }
@@ -85,7 +58,7 @@ class GeminiService {
     try {
       console.log('Testing Gemini API connection...')
       
-      // First, list available models and set a working one
+      // First, find a working model
       const workingModelName = await this.listAvailableModels()
       
       if (!workingModelName || !this.model) {
@@ -93,11 +66,7 @@ class GeminiService {
         return false
       }
       
-      // Test the working model
-      const result = await this.model.generateContent('Hello, respond with "API working"')
-      const response = await result.response
-      const text = response.text()
-      console.log(`Success with model ${workingModelName}:`, text)
+      console.log(`✅ Connection successful with model: ${workingModelName}`)
       return true
       
     } catch (error) {
@@ -147,7 +116,12 @@ class GeminiService {
         console.log('No model set, trying to find a working model...')
         const workingModelName = await this.listAvailableModels()
         if (!workingModelName || !this.model) {
-          throw new Error('No working model found')
+          // Try direct model initialization as last resort
+          console.log('Trying direct model initialization...')
+          this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' })
+          if (!this.model) {
+            throw new Error('No working model found')
+          }
         }
       }
       

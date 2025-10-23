@@ -58,3 +58,7 @@ If the AI chat isn't working:
 2. Ensure the frontend server is restarted after adding the API key
 3. Check the browser console for any error messages
 4. Verify your internet connection
+
+
+
+

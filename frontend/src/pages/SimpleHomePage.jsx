@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import HeroSection from '../components/HeroSection'
 import MovieCard from '../components/movie/MovieCard'
 import SearchBar from '../components/common/SearchBar'
-import { Sparkles, FileQuestion } from 'lucide-react'
+import { Sparkles, FileQuestion, Bot } from 'lucide-react'
 import movieService from '../services/movieService'
 
 const SimpleHomePage = () => {
@@ -33,6 +33,14 @@ const SimpleHomePage = () => {
     <div className="bg-gray-900 relative">
       {/* Floating Action Buttons */}
       <div className="fixed bottom-8 right-4 z-50 flex flex-col items-end space-y-4">
+        <div className="group relative">
+          <Link to="/ai-recommendations" className="bg-green-600 text-white p-3 rounded-full shadow-lg hover:bg-green-700 transition-colors duration-300 flex items-center justify-center">
+            <Bot className="w-6 h-6" />
+          </Link>
+          <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-gray-800 text-white text-sm px-3 py-1 rounded-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            AI Chat
+          </div>
+        </div>
         <div className="group relative">
           <Link to="/recommendations" className="bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center">
             <Sparkles className="w-6 h-6" />

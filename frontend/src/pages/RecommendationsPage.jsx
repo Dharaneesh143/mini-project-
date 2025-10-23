@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import movieService from '../services/movieService'
 import LoadingSpinner from '../components/common/LoadingSpinner'
+import MovieCard from '../components/movie/MovieCard'
+import MovieGrid from '../components/movie/MovieGrid'
 import { Play, Heart } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -22,7 +24,8 @@ const RecommendationsPage = () => {
       setLoading(true)
       // For demo, use popular movies as AI recommendations
       const response = await movieService.getPopularMovies()
-      setRecommendedMovies(response.movies)
+      console.log('Recommendations response:', response)
+      setRecommendedMovies(response.movies || [])
     } catch (error) {
       console.error('Error loading recommended movies:', error)
       toast.error('Failed to load recommendations')
@@ -62,32 +65,30 @@ const RecommendationsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <h1 className="text-4xl font-bold mb-6">AI-Powered Movie Recommendations</h1>
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-        {recommendedMovies.map(movie => (
-          <div key={movie.id} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:scale-105 transition-transform cursor-pointer">
-            <div className="aspect-[2/3] bg-gray-700 flex items-center justify-center">
-              <Play className="w-12 h-12 text-gray-400" />
-            </div>
-            <div className="p-4">
-              <h3 className="font-semibold text-white mb-1 truncate">{movie.title}</h3>
-              <div className="flex items-center space-x-2 text-sm text-gray-400 mb-2">
-                <span>Rating: {movie.rating || 'N/A'}</span>
-                <span>•</span>
-                <span>Year: {movie.year || 'N/A'}</span>
-              </div>
-              <button
-                onClick={() => toggleWatchlist(movie)}
-                className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                  isInWatchlist(movie.id) ? 'bg-red-600 text-white' : 'bg-blue-600 text-white'
-                }`}
-              >
-                {isInWatchlist(movie.id) ? 'Remove from Watchlist' : 'Add to Watchlist'}
-              </button>
-            </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">🎯 Movie Recommendations</h1>
+          <p className="text-gray-600 dark:text-gray-400 text-lg">
+            Discover amazing movies curated just for you based on popular trends and ratings
+          </p>
+        </div>
+
+        {recommendedMovies.length === 0 && !loading ? (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">🎬</div>
+            <h2 className="text-2xl font-semibold mb-2">No Recommendations Yet</h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              We're working on finding the perfect movies for you. Check back soon!
+            </p>
           </div>
-        ))}
+        ) : (
+          <MovieGrid 
+            movies={recommendedMovies}
+            isInWatchlist={isInWatchlist}
+            onToggleWatchlist={toggleWatchlist}
+          />
+        )}
       </div>
     </div>
   )
