@@ -26,9 +26,22 @@ const GenrePage = () => {
       try {
         const genreName = getGenreName(genre)
         console.log('Fetching movies for genre:', genreName)
+        
+        // Get genre ID from the genres data
+        const { getGenreIdByName } = await import('../data/genres')
+        const genreId = getGenreIdByName(genreName)
+        
+        if (!genreId) {
+          throw new Error(`Genre "${genreName}" not found`)
+        }
+        
+        // Use the existing genre API endpoint
+        console.log('Fetching movies for genre:', genreName, 'with ID:', genreId)
         const response = await movieService.getMoviesByGenre(genreName, 1)
-        setGenreMovies(response.movies || [])
         console.log('Genre movies response:', response)
+        console.log('Number of movies found:', response.movies?.length)
+        console.log('First few movie titles:', response.movies?.slice(0, 3).map(m => m.title))
+        setGenreMovies(response.movies || [])
       } catch (err) {
         console.error('Error fetching genre movies:', err)
         setError('Failed to load movies for this genre')

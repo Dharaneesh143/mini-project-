@@ -54,7 +54,7 @@ const GenreDropdown = ({ selectedGenres, onChange }) => {
         <span className="mr-2">🎬</span>
         Browse by Genre
         <svg
-          className="-mr-1 ml-2 h-5 w-5"
+          className={`-mr-1 ml-2 h-5 w-5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
@@ -65,16 +65,22 @@ const GenreDropdown = ({ selectedGenres, onChange }) => {
       </button>
 
       {isOpen && (
-        <div className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
-          <div className="py-1 max-h-60 overflow-auto">
+        <div className="origin-top-right absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 focus:outline-none z-50 border border-gray-200 dark:border-gray-700">
+          <div className="py-1 max-h-80 overflow-auto">
+            <div className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700">
+              Select a Genre
+            </div>
             {genresList.map((genre) => (
               <button
                 key={genre}
                 onClick={() => handleGenreSelect(genre)}
-                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                className="flex items-center w-full px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer transition-colors group"
               >
-                <span className="mr-2">{getGenreEmoji(genre)}</span>
-                <span>{genre}</span>
+                <span className="mr-3 text-lg group-hover:scale-110 transition-transform">{getGenreEmoji(genre)}</span>
+                <span className="font-medium">{genre}</span>
+                <span className="ml-auto text-xs text-gray-400 group-hover:text-blue-500">
+                  →
+                </span>
               </button>
             ))}
           </div>

@@ -1,9 +1,20 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Play, Star, TrendingUp } from 'lucide-react'
 import SearchBar from './common/SearchBar'
 
 const HeroSection = () => {
   const [searchQuery, setSearchQuery] = useState('')
+  const navigate = useNavigate()
+
+  const handleStartExploring = () => {
+    navigate('/recommendations')
+  }
+
+  const handleViewTrending = () => {
+    navigate('/trending')
+  }
+
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white flex items-center">
       {/* Background Effects */}
@@ -44,12 +55,18 @@ const HeroSection = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
-            <button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-full text-lg transition-all transform hover:scale-105 flex items-center justify-center space-x-3">
+            <button 
+              onClick={handleStartExploring}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-full text-lg transition-all transform hover:scale-105 flex items-center justify-center space-x-3"
+            >
               <Play className="w-6 h-6" />
               <span>Start Exploring</span>
             </button>
 
-            <button className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 hover:bg-gray-700/50 text-white font-bold py-4 px-8 rounded-full text-lg transition-all transform hover:scale-105 flex items-center justify-center space-x-3">
+            <button 
+              onClick={handleViewTrending}
+              className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 hover:bg-gray-700/50 text-white font-bold py-4 px-8 rounded-full text-lg transition-all transform hover:scale-105 flex items-center justify-center space-x-3"
+            >
               <TrendingUp className="w-6 h-6" />
               <span>View Trending</span>
             </button>

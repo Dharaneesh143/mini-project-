@@ -389,6 +389,89 @@ const getTMDBMovieDetails = async (req, res) => {
   }
 }
 
+// @desc    Get movies with filters
+// @route   GET /api/movies/filtered
+// @access  Public
+const getFilteredMovies = async (req, res) => {
+  try {
+    const { 
+      page = 1, 
+      limit = 20, 
+      genre, 
+      language, 
+      rating, 
+      runtime, 
+      sortBy = 'popularity' 
+    } = req.query
+
+    console.log('Filtering movies with params:', req.query)
+
+    // Build TMDB discover parameters
+    const discoverParams = {
+      page: parseInt(page),
+      sort_by: sortBy === 'rating' ? 'vote_average.desc' : 
+               sortBy === 'newest' ? 'release_date.desc' :
+               sortBy === 'oldest' ? 'release_date.asc' :
+               sortBy === 'runtime' ? 'runtime.desc' : 'popularity.desc'
+    }
+
+    // Add genre filter
+    if (genre) {
+      discoverParams.with_genres = genre
+    }
+
+    // Add language filter
+    if (language) {
+      discoverParams.with_original_language = language
+    }
+
+    // Add rating filter
+    if (rating && rating !== 'any') {
+      const ratingMap = {
+        'average': 6.0,
+        'good': 7.0,
+        'high': 8.0
+      }
+      if (ratingMap[rating]) {
+        discoverParams['vote_average.gte'] = ratingMap[rating]
+      }
+    }
+
+    // Add runtime filter
+    if (runtime) {
+      const runtimeMap = {
+        'short': { min: 0, max: 90 },
+        'medium': { min: 90, max: 120 },
+        'long': { min: 120, max: 180 },
+        'very-long': { min: 180, max: 999 }
+      }
+      if (runtimeMap[runtime]) {
+        discoverParams['with_runtime.gte'] = runtimeMap[runtime].min
+        discoverParams['with_runtime.lte'] = runtimeMap[runtime].max
+      }
+    }
+
+    console.log('TMDB discover params:', discoverParams)
+    const tmdbData = await tmdbService.getFilteredMovies(discoverParams)
+    
+    res.json({
+      success: true,
+      count: tmdbData.movies.length,
+      page: tmdbData.page,
+      totalPages: tmdbData.totalPages,
+      totalResults: tmdbData.totalResults,
+      data: tmdbData.movies || []
+    })
+  } catch (error) {
+    console.error('Filtered movies error:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    })
+  }
+}
+
 module.exports = {
   getMovies,
   getMovie,
@@ -403,5 +486,6 @@ module.exports = {
   getUpcomingMovies,
   getNowPlayingMovies,
   getTMDBMovieDetails,
-  getAllMovies
+  getAllMovies,
+  getFilteredMovies
 }

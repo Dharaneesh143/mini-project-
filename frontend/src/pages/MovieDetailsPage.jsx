@@ -137,12 +137,32 @@ const CastCrewSection = ({ movie }) => (
           <span className="mr-2">👨‍🎤</span>
           Main Cast
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {movie.cast.slice(0, 9).map((actor, index) => (
-            <div key={index} className="bg-gray-700 rounded-lg p-3">
-              <p className="text-white font-medium">{actor.name || actor}</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+          {movie.cast.slice(0, 12).map((actor, index) => (
+            <div key={index} className="bg-gray-700 rounded-lg p-3 text-center hover:bg-gray-600 transition-colors">
+              <div className="w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
+                {actor.profile_path ? (
+                  <img 
+                    src={`https://image.tmdb.org/t/p/w185${actor.profile_path}`}
+                    alt={actor.name || actor}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none'
+                      e.target.nextSibling.style.display = 'flex'
+                    }}
+                  />
+                ) : null}
+                <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs" style={{display: actor.profile_path ? 'none' : 'flex'}}>
+                  👤
+                </div>
+              </div>
+              <p className="text-white font-medium text-sm truncate" title={actor.name || actor}>
+                {actor.name || actor}
+              </p>
               {actor.character && (
-                <p className="text-gray-400 text-sm">as {actor.character}</p>
+                <p className="text-gray-400 text-xs truncate" title={actor.character}>
+                  as {actor.character}
+                </p>
               )}
             </div>
           ))}

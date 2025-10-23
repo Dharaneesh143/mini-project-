@@ -146,16 +146,24 @@ class MovieService {
   // Get movies by genre
   async getMoviesByGenre(genre, page = 1) {
     try {
-      if (hasTmdbKey()) {
-        // Fallback to search by genre name when using TMDB without genre mapping
-        const data = await tmdbSearch(genre, page, false)
-        const movies = data.results.map(mapTmdbToMovie)
-        return { movies, totalPages: data.total_pages, totalResults: data.total_results, page: data.page }
-      }
+      console.log('Fetching movies by genre:', genre, 'page:', page)
       const response = await this.api.get(`/movies/genre/${genre}`, { params: { page, limit: 20 } })
+      console.log('Backend genre response:', response.data)
       return this.formatMoviesResponse(response.data)
     } catch (error) {
       console.error('Error fetching movies by genre:', error)
+      // Fallback to TMDB if backend fails and TMDB key is available
+      if (hasTmdbKey()) {
+        try {
+          console.log('Falling back to TMDB search for genre:', genre)
+          const data = await tmdbSearch(genre, page, false)
+          const movies = data.results.map(mapTmdbToMovie)
+          return { movies, totalPages: data.total_pages, totalResults: data.total_results, page: data.page }
+        } catch (tmdbError) {
+          console.error('TMDB fallback also failed:', tmdbError)
+          throw error // Throw original error
+        }
+      }
       throw error
     }
   }
@@ -168,6 +176,32 @@ class MovieService {
     } catch (error) {
       console.error('Error fetching genres:', error)
       return []
+    }
+  }
+
+  // Get movies with filters
+  async getFilteredMovies(filters = {}, page = 1) {
+    try {
+      const params = {
+        page,
+        limit: 20,
+        ...filters
+      }
+
+      // Remove empty filters
+      Object.keys(params).forEach(key => {
+        if (params[key] === '' || params[key] === null || params[key] === undefined) {
+          delete params[key]
+        }
+      })
+
+      console.log('Fetching filtered movies with params:', params)
+      const response = await this.api.get('/movies/discover', { params })
+      return this.formatMoviesResponse(response.data)
+    } catch (error) {
+      console.error('Error fetching filtered movies:', error)
+      // Fallback to popular movies if filtering fails
+      return this.getPopularMovies(page)
     }
   }
 

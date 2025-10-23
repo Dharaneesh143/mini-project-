@@ -242,6 +242,24 @@ class TMDBService {
     }
   }
 
+  // Get filtered movies using TMDB discover endpoint
+  async getFilteredMovies(params = {}) {
+    try {
+      const api = this.createAxiosInstance()
+      const response = await api.get('/discover/movie', {
+        params: {
+          include_adult: false,
+          include_video: false,
+          ...params
+        }
+      })
+      return this.formatMoviesResponse(response.data)
+    } catch (error) {
+      console.error('Error fetching filtered movies:', error.message)
+      throw new Error('Failed to fetch filtered movies from TMDB')
+    }
+  }
+
   // Format movies response
   formatMoviesResponse(data, isDetailed = false) {
     const movies = isDetailed

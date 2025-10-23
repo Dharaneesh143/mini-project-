@@ -13,7 +13,8 @@ const {
   getUpcomingMovies,
   getNowPlayingMovies,
   getTMDBMovieDetails,
-  getAllMovies
+  getAllMovies,
+  getFilteredMovies
 } = require('../controllers/movieController')
 const { optionalAuth } = require('../middleware/auth')
 
@@ -38,10 +39,11 @@ router.get('/tmdb/search', searchTMDBMovies)
 router.get('/tmdb/:id', getTMDBMovieDetails)
 router.get('/genres', getGenres)
 router.get('/search', searchMovies)
+router.get('/discover', getFilteredMovies)
 router.get('/genre/:genre', getMoviesByGenre)
 router.get('/all', getAllMovies)
-router.get('/:id', getMovie)
 router.get('/:id/similar', getSimilarMovies)
 router.get('/:id/recommendations', getMovieRecommendations)
+router.get('/:id', getMovie)
 
 module.exports = router

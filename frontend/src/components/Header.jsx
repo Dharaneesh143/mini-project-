@@ -21,6 +21,7 @@ const Header = () => {
   const navigationItems = [
     { path: '/', label: 'Home', icon: '🏠' },
     { path: '/trending', label: 'Trending', icon: '🔥' },
+    { path: '/discover', label: 'Discover', icon: '🔍' },
     { path: '/recommendations', label: 'For You', icon: '🎯' },
     { path: '/ai-recommendations', label: 'AI Chat', icon: '🤖' },
     { path: '/watchlist', label: 'Watchlist', icon: '📋' }

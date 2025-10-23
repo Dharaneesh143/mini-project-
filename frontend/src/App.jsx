@@ -21,6 +21,7 @@ import SignupPage from './pages/SignupPage'
 import SearchResultsPage from './pages/SearchResultsPage'
 import TrendingPage from './pages/TrendingPage'
 import GenrePage from './pages/GenrePage'
+import FilteredMoviesPage from './pages/FilteredMoviesPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 // Styles
@@ -81,6 +82,7 @@ function App() {
           <Route path="search" element={<SearchResultsPage />} />
           <Route path="trending" element={<TrendingPage />} />
           <Route path="genre/:genre" element={<GenrePage />} />
+          <Route path="discover" element={<FilteredMoviesPage />} />
 
           {/* 404 Not Found */}
           <Route path="*" element={<NotFoundPage />} />
