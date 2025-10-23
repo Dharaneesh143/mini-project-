@@ -24,6 +24,9 @@ const Header = () => {
             <Link to="/recommendations" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
               Recommendations
             </Link>
+            <Link to="/ai-recommendations" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
+              AI Chat
+            </Link>
             <Link to="/quiz" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
               Quiz
             </Link>

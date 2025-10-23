@@ -12,6 +12,7 @@ import TestPage from './pages/TestPage'
 import MovieDetailsPage from './pages/MovieDetailsPage'
 import WatchlistPage from './pages/WatchlistPage'
 import RecommendationsPage from './pages/RecommendationsPage'
+import AIRecommendationPage from './pages/AIRecommendationPage'
 import ProfilePage from './pages/ProfilePage'
 import QuizPage from './pages/QuizPage'
 import TimeBasedSuggestionPage from './pages/TimeBasedSuggestionPage'
@@ -73,6 +74,7 @@ function App() {
           <Route path="movie/:id" element={<MovieDetailsPage />} />
           <Route path="watchlist" element={<WatchlistPage />} />
           <Route path="recommendations" element={<RecommendationsPage />} />
+          <Route path="ai-recommendations" element={<AIRecommendationPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="quiz" element={<QuizPage />} />
           <Route path="time-suggestions" element={<TimeBasedSuggestionPage />} />

@@ -1,17 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { MessageCircle, X, Send, Bot, User } from 'lucide-react'
+import { MessageCircle, X, Send, Bot, User, Sparkles } from 'lucide-react'
+import geminiService from '../../services/geminiService'
+import movieService from '../../services/movieService'
 
 const ChatBot = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hi! I'm your movie recommendation assistant. How can I help you find the perfect movie today?",
+      text: "Hi! I'm your AI movie recommendation assistant powered by Gemini. I can help you find movies based on stories, songs, or any description. What would you like to watch today?",
       sender: 'bot',
       timestamp: new Date()
     }
   ])
   const [inputMessage, setInputMessage] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [recommendedMovies, setRecommendedMovies] = useState([])
   const messagesEndRef = useRef(null)
 
   const scrollToBottom = () => {
@@ -21,6 +24,15 @@ const ChatBot = ({ isOpen, onClose }) => {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    if (isOpen) {
+      // Test API connection when chat opens
+      geminiService.testConnection()
+      // List available models to see what's available
+      geminiService.listAvailableModels()
+    }
+  }, [isOpen])
 
   const handleSendMessage = async (e) => {
     e.preventDefault()
@@ -37,75 +49,101 @@ const ChatBot = ({ isOpen, onClose }) => {
     setInputMessage('')
     setIsTyping(true)
 
-    // Simulate bot response
-    setTimeout(() => {
-      const botResponse = generateBotResponse(inputMessage)
+    try {
+      // Use Gemini AI for intelligent responses
+      const aiResponse = await generateAIResponse(inputMessage)
+      
       const botMessage = {
         id: Date.now() + 1,
-        text: botResponse,
+        text: aiResponse.response,
+        sender: 'bot',
+        timestamp: new Date(),
+        recommendations: aiResponse.recommendations || []
+      }
+      
+      setMessages(prev => [...prev, botMessage])
+      
+      // If we have movie recommendations, try to fetch actual movie data
+      if (aiResponse.recommendations && aiResponse.recommendations.length > 0) {
+        await fetchRecommendedMovies(aiResponse.recommendations)
+      }
+    } catch (error) {
+      console.error('Error generating AI response:', error)
+      const errorMessage = {
+        id: Date.now() + 1,
+        text: "I'm sorry, I'm having trouble connecting to the AI service right now. Please try again later!",
         sender: 'bot',
         timestamp: new Date()
       }
-      setMessages(prev => [...prev, botMessage])
+      setMessages(prev => [...prev, errorMessage])
+    } finally {
       setIsTyping(false)
-    }, 1000 + Math.random() * 1000)
+    }
   }
 
-  const generateBotResponse = (userInput) => {
-    const input = userInput.toLowerCase()
-    
-    if (input.includes('action') || input.includes('adventure')) {
-      return "Great choice! I'd recommend checking out some action-packed movies like The Dark Knight, Mad Max: Fury Road, or John Wick. Would you like me to show you more action movies?"
+  const generateAIResponse = async (userInput) => {
+    try {
+      // Check if input contains song names or story descriptions
+      const input = userInput.toLowerCase()
+      
+      if (input.includes('song') || input.includes('music') || input.includes('melody') || 
+          input.includes('track') || input.includes('artist') || input.includes('band')) {
+        return await geminiService.getMoviesFromSong(userInput)
+      }
+      
+      if (input.includes('story') || input.includes('plot') || input.includes('narrative') ||
+          input.includes('tale') || input.includes('scenario') || input.includes('describe')) {
+        return await geminiService.analyzeStoryForMovies(userInput)
+      }
+      
+      // General movie recommendation
+      return await geminiService.generateMovieRecommendations(userInput)
+    } catch (error) {
+      console.error('Error generating AI response:', error)
+      // Fallback to simple response
+      return {
+        response: "I'd love to help you find the perfect movie! Can you tell me more about what you're looking for?",
+        recommendations: []
+      }
     }
-    
-    if (input.includes('comedy') || input.includes('funny')) {
-      return "Looking for some laughs? I suggest movies like The Grand Budapest Hotel, Superbad, or Knives Out. What type of comedy do you prefer - romantic, dark, or slapstick?"
+  }
+
+  const fetchRecommendedMovies = async (recommendations) => {
+    try {
+      const moviePromises = recommendations.slice(0, 3).map(async (rec) => {
+        try {
+          // Search for the movie using our movie service
+          const searchResults = await movieService.searchMovies(rec.title)
+          if (searchResults.movies && searchResults.movies.length > 0) {
+            return searchResults.movies[0] // Return the first match
+          }
+          return null
+        } catch (error) {
+          console.error(`Error searching for ${rec.title}:`, error)
+          return null
+        }
+      })
+
+      const movies = await Promise.all(moviePromises)
+      const validMovies = movies.filter(movie => movie !== null)
+      
+      if (validMovies.length > 0) {
+        setRecommendedMovies(validMovies)
+      }
+    } catch (error) {
+      console.error('Error fetching recommended movies:', error)
     }
-    
-    if (input.includes('horror') || input.includes('scary')) {
-      return "If you're in the mood for some thrills, try Hereditary, Get Out, or A Quiet Place. How intense do you like your horror movies?"
-    }
-    
-    if (input.includes('romance') || input.includes('love')) {
-      return "Romance movies are perfect for a cozy night! I recommend The Princess Bride, When Harry Met Sally, or La La Land. Are you looking for classic or modern romance?"
-    }
-    
-    if (input.includes('sci-fi') || input.includes('science fiction')) {
-      return "Sci-fi is amazing! You might enjoy Blade Runner 2049, Interstellar, or Ex Machina. Do you prefer space adventures or futuristic Earth stories?"
-    }
-    
-    if (input.includes('recommend') || input.includes('suggest')) {
-      return "I'd be happy to recommend movies! What genre are you in the mood for? Or tell me about a movie you recently enjoyed, and I can suggest similar ones."
-    }
-    
-    if (input.includes('popular') || input.includes('trending')) {
-      return "The most popular movies right now include a mix of blockbusters and critically acclaimed films. Would you like to see what's trending in a specific genre?"
-    }
-    
-    if (input.includes('rating') || input.includes('good')) {
-      return "I can help you find highly-rated movies! Are you looking for critically acclaimed films, audience favorites, or movies with specific ratings?"
-    }
-    
-    // Default responses
-    const defaultResponses = [
-      "That's interesting! Can you tell me more about what type of movies you enjoy?",
-      "I'd love to help you find the perfect movie. What genre or mood are you looking for?",
-      "Great question! Are you looking for something specific like a particular genre, actor, or time period?",
-      "I'm here to help you discover amazing movies. What kind of experience are you looking for today?"
-    ]
-    
-    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)]
   }
 
   if (!isOpen) return null
 
   return (
-    <div className="fixed bottom-4 right-4 w-80 h-96 bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col z-50">
+    <div className="fixed bottom-4 right-4 w-96 h-[500px] bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col z-50">
       {/* Header */}
-      <div className="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-t-lg flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Bot size={20} />
-          <span className="font-semibold">Movie Assistant</span>
+          <Sparkles size={20} />
+          <span className="font-semibold">AI Movie Assistant</span>
         </div>
         <button
           onClick={onClose}
@@ -156,6 +194,34 @@ const ChatBot = ({ isOpen, onClose }) => {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Recommended Movies */}
+      {recommendedMovies.length > 0 && (
+        <div className="border-t border-gray-200 p-4 bg-gray-50">
+          <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-1">
+            <Sparkles size={14} />
+            AI Recommendations
+          </h4>
+          <div className="space-y-2 max-h-32 overflow-y-auto">
+            {recommendedMovies.map((movie, index) => (
+              <div key={index} className="flex items-center gap-2 p-2 bg-white rounded border">
+                <img 
+                  src={movie.poster || movie.posterPath || 'https://via.placeholder.com/40x60/374151/9ca3af?text=No+Poster'} 
+                  alt={movie.title}
+                  className="w-8 h-12 object-cover rounded"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-gray-900 truncate">{movie.title}</p>
+                  <p className="text-xs text-gray-500">{movie.year || 'N/A'}</p>
+                </div>
+                <div className="text-xs text-yellow-600 font-semibold">
+                  ⭐ {movie.rating || movie.voteAverage || 'N/A'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Input */}
       <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200">
         <div className="flex gap-2">
@@ -163,7 +229,7 @@ const ChatBot = ({ isOpen, onClose }) => {
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Ask about movies..."
+            placeholder="Describe a story, mention a song, or ask for movie recommendations..."
             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
           />
           <button
